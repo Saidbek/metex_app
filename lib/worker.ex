@@ -1,5 +1,17 @@
 defmodule Metex.Worker do
-  def temperature_of(location) do
+  def loop do
+    receive do
+      {sender_pid, location} ->
+        send(sender_pid, {:ok, temperature_of(location)})
+      _ ->
+        IO.puts "don't know how to process this message"
+    end
+    loop()
+  end
+
+  # # Helper functions
+
+  defp temperature_of(location) do
     result = url_for(location) |> HTTPoison.get |> parse_response
     case result do
       {:ok, temp} ->
@@ -8,8 +20,6 @@ defmodule Metex.Worker do
         "#{location} not found"
     end
   end
-
-  # helper functions
 
   defp url_for(location) do
     location = URI.encode(location)

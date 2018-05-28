@@ -1,18 +1,12 @@
 defmodule Metex do
-  @moduledoc """
-  Documentation for Metex.
-  """
+  def temperature_of(cities) do
+    # create cordinator process with 2 args (empty list, number of cities)
+    coordinator_pid = spawn(Metex.Coordinator, :loop, [[], Enum.count(cities)])
 
-  @doc """
-  Hello world.
+    cities |> Enum.each(fn city ->
+      worker_pid = spawn(Metex.Worker, :loop, [])
 
-  ## Examples
-
-      iex> Metex.hello
-      :world
-
-  """
-  def hello do
-    :world
+      send(worker_pid, {coordinator_pid, city})
+    end)
   end
 end
